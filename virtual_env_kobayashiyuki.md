@@ -1,29 +1,48 @@
 # 環境構築作業手順書  
-* バージョン一覧  
+* バージョン一覧  ＃テーブルで
   * Dockerを使用しました
   * php 7.3
   * DB MySQL5.7
   * Webサーバ- Apache
   * Laravel 6.0
-### 下記にて仮装環境手順説明  
+### 下記にて仮想環境手順説明  
 **マックOSにてDocker、php 等の環境は既にインストール済みとして説明します。何卒ご理解ください。**
-### まずはdockerで動かすためのLaravel バージョン6.0で指定したララベルアプリを作っていきます。
+## 目次
+1. [Laravelアプリの雛形を作成](#midashi1)
+1. [laradockをクローンする](#midashi2)
+1. [プロジェクト別でDockerマシンを区別するための準備をする](#midashi3)
+1. [laradockでbuildなどDockerのコマンドで操作する](#midashi4)
+1. [Apacheの設定ファイルを編集しlaravelのWELCOME画面を表示させる](#midashi5)
+1. [DBの設定を編集しユーザー登録などをできるようにする](#midashi6)
+1. [参考サイト](#midashi7)
+1. [初感](#midashi8)
+<a id="midashi1"></a>
+
+##  1. Dockerで動かすためのLaravelをバージョン6.0で指定したものを作っていきます。 
   * コマンドラインにて
 ``cd 任意のアプリを作りたいディレクトリ
 ``
 その後指定したディレクトリ上で
 `` composer create-project --prefer-dist laravel/laravel laravel_app "6.*"
  ``コマンドにてバージョンを指定し今回は**laravel laravel_app**という名前のアプリを作成します。 
-  今回使用するのはバージョン６.０ということなので**6.0**とバージョンを指定しています
- <br>
-### その後dockerを使用してLaravelの環境構築をするにあたって便利な laradock というものを使用します。
+
+  今回使用するのはバージョン6.0ということなので6.*とバージョンを指定しています
+
+ <a id="midashi2"></a>
+
+### 2. Dockerを使用してLaravelの環境構築をするにあたって便利な laradock を使用します。
+*laladockとはlaravelアプリをDockerで動かす際に必要なファイルやイメージが用意されたファイルのことを指す。*
 * まずは ``
- git clone https://github.com/laradock/laradock.git ``というコードを先ほどlaravel_appを作ったディレクトリ直下で打ちgit cloneで便利なlaradockを作業用ディレクトリに追加します。
-その後`` cd laradock ``をコマンド上で打ちlaradockに移動します
-### プロジェクトごとにdockerマシンを区別して使うための準備をしていきます。
-`` cp env.example .env ``コマンドを打ち
-その中に`` DATA_PATH_HOST `` の設定をLaravelのプロジェクト名と同じにしておきます。
-``  vi env.example ``で中を覗いてみましょう。
+ git clone https://github.com/laradock/laradock.git ``というコードを先ほどlaravel_appを作ったディレクトリ直下にて実行。
+ 便利な``laradock``を作業用ディレクトリに追加します。
+その後``$ cd laradock ``を実行し``laradock``ディレクトリに移動します
+
+<a id="midashi3"></a>
+
+### 3. プロジェクトごとにdockerマシンを区別して使うための準備をしていきます。
+``$ cp env.example .env ``実行後
+その中に記載されている`` DATA_PATH_HOST `` の部分をLaravelのプロジェクト名と同じにしておきます。
+では早速``$  vi env.example ``で中を覗いてみましょう。
 その中に
 ```
 ### Paths #################################################
@@ -43,23 +62,15 @@ DATA_PATH_HOST=~/.laradock/data
 ### Drivers ################################################
 ```
 とあるのでその中の
-``
-DATA_PATH_HOST=~/.laradock/data
-``
+``DATA_PATH_HOST=~/.laradock/data``
 とあるので以下に編集をしましょう
-``
-DATA_PATH_HOST=~/.laradock-laravel_app/data  
-``
+``DATA_PATH_HOST=~/.laradock-laravel_app/data  ``
 * ここから大切な`` docker-compose.yml``のファイルを編集していきます。
 ※この後に行う`` build ``コマンドなどを行う上でこのファイルを参照するのでインデントなどが崩れてしまうとエラーを起こすので注意してください。
 * `` docker-compose.yml``では作成するコンテナの作業ディレクトリを指定します。
 ※ここでいうコンテナとは自分のOSのなかにある仮装OSのことです。
-``
-vi docker-compose.yml
-``にてファイルを開き下記の様に
-``
-working_dir
-``の行を追加し、その後のパスを追記してください。
+``$ vi docker-compose.yml``にてファイルを開き下記の様に
+``working_dir``の行を追加し、その後のパスを追記してください。
  ```
  ### Workspace Utilities ##################################
     workspace:
@@ -71,13 +82,15 @@ working_dir
          # 省略
 
           - no_proxy
-        working_dir: /var/www/laravel_app # この行を追加
+        working_dir: /var/www/laravel_app # この行は本来ないので追加
         volumes:
           - ${APP_CODE_PATH_HOST}:${APP_CODE_PATH_CONTAINER}${APP_CODE_CONTAINER_FLAG}
           - ./php-worker/supervisord.d:/etc/supervisord.d
  ```
 ここまで編集が終わったら前準備は完了です。
-### laradockにあるもので必要なものだけをbuildしましょう
+<a id="midashi4"></a>
+
+### 4. laradockにあるもので必要なものだけをbuildしましょう
 * 今回必要となるコンテナは、以下です。それ以外のコンテナは作成する必要はありません。
   * workspace
   * mysql
@@ -88,7 +101,9 @@ working_dir
 *　コマンドを実行しコンテナの作成を行いますが
 僕との約束です。以下を守りましょう。
 ``docker-compose`` というコマンドは コマンドを実行したディレクトリの ``docker-compose.yml`` ファイルの内容に従って処理を行いますので、
-**必ず** ``docker-compose.yml`` がある**ディレクトリに移動してコマンドを実行しましょう。**
+
+**必ず** ``docker-compose.yml`` がある
+**ディレクトリに移動してコマンドを実行しましょう。**
 
 * それでは``docker-compose.yml``のあるディレクトリにて
 ```
@@ -119,17 +134,18 @@ laradock_workspace_1          "/sbin/my_init"          workspace           runni
 
 ここでもし、大量の``WARN[0000]``の警告を吐いても焦らず自分が
 ``docker-compose.yml``のあるディレクトリにいるか確認をしてください。
-そして、何かコンテナに変更を加えた際は**必ず**``
+そして、何かコンテナに変更を加えた際は
+**必ず**``
 $ docker-compose ps
 ``コマンドで変更されているかチェックする癖をつけましょう。
 
 ではここで一度[http://localhost](http://localhost)を確認しましょう。
-どうでしょうか、みんなが大好きなlaravelのWLCOMは表示されましたか。
+どうでしょうか、みんなが大好きなlaravelのWLCOMEは表示されましたか。
 答えはノーですよね。
-### それではWLCOMを表示させるためにApacheの設定ファイルを編集していきましょう！
+<a id="midashi5"></a>
+### 5. WLCOME画面を表示させるためにApacheの設定ファイルを編集していきましょう！
 対象ファイルは、``laradock/apache2/sites/default.apache.conf`` です。
-``$ cd 対象のディレクトリ``でへ``default.apache.conf``のあるディレクトリへ移動しましょう。
-その後``$ vi default.apache.conf``にて中身をみてください
+その後``$　vi パス名/default.apache.conf``にて中身をみてください
 ```
 <VirtualHost *:80>
   ServerName laradock.test　　１
@@ -187,7 +203,9 @@ $ docker-compose ps
 ``$ docker-compose up -d workspace apache2``を実行してみましょう。
 <br>
 ※``docker-compose up`` で起動した場合、Logを吐き出し続け入力を受け付けない状態となり不便なので、バックグラウンドで起動をし続けられるよう -d オプションを付けて実行しましょう。
-### DBの設定偏
+<a id="midashi6"></a>
+
+### 6. DBの設定をしよう
 最初に作ったバージョン6.0のlaravel_appディレクトリ直下に``.env``ファイルがあります。
 では``.env``ファイルを``$ vi``で開きファイルを編集しましょう
 ```
@@ -207,7 +225,8 @@ DB_PASSWORD=root     # 変更
     するとコマンドの様子が``root@XXXXXXXXX:/#``の様になりましたか。
     この``XXXXXXXXX``部分はご自身の環境によって変わります。
     <br>
-    コンテナ内にログインしたら``php artisan migrate``を実行してみましょう。
+    コンテナ内にログインしたら
+    ``php artisan migrate``を実行してみましょう。
     マイグレーションが正常に実行できましたでしょうか？？
     実行できたらもう一つの方法を試すために一度 
     ``php artisan migrate:reset`` を実行してテーブルを削除して``exit``でコンテナから抜けましょう。
@@ -217,4 +236,22 @@ DB_PASSWORD=root     # 変更
   ``docker-compose.yml``があるディレクトリにて
   ``$ docker-compose exec workspace php artisan migrate``を実行してください。
   その後ログインなどDBに接続できれば成功です！
-  
+<a id="midashi7"></a>
+
+## 7. 参考サイト
+* [マークダウン記法のqiit](https://qiita.com/shizuma/items/8616bbe3ebe8ab0b6ca1)コレを見ればなんとなくマークダウン記法が描ける様になります！
+* [マークダウン記法ページ内リンク](https://shinshin86.hateblo.jp/entry/2020/04/08/224318)
+* [dockerのコンテナとは](https://tech-lab.sios.jp/archives/18811)コンテナと言われ簡単に説明がしたかったのでこちらのサイトを参考にしました。
+
+<a id="midashi8"></a>
+
+## 8. 初感
+* 書簡として私の場合本来Vagrantでやる部分を記憶に新しいDockerでやらせていただいたので、とても難しいや分からない！ということでは無かったです。
+* 基本的にカリキュラムも丁寧なため、しっかり文字を読み自分なりに落とし込めさえすれば、大幅に道が逸れるということはなかったです。
+何よりメンターさんがいたことと、勢いに任せた部分があったので。
+* **ここから大事なことを書きます！**
+この学習の上でかなり勉強になったのは何かエラーが会った際は
+一度``docker-compose down``で一度ダウンさせ、``buildまたはup``をすると
+解決する場面が多々あったので、それは何かあったら思い出してみます。
+* また、今回``laravel 6.0``にて認証やログイン機能を作れなかったのでそちらも挑戦したかったです。
+* またマークダウン記法の確認がV.SCODEのみでできることも驚きました！
