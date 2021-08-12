@@ -268,13 +268,13 @@ $ docker-compose exec workspace bash
 <br>
 コンテナ内にログインしたら
 ``` shell
-$ php artisan migrate
+root@XXXXXXXXX:php artisan migrate
 ```
 を実行してみましょう。
 マイグレーションが正常に実行できましたでしょうか？？
 実行できたらもう一つの方法を試すために一度 
 ``` shell
-$ php artisan migrate:reset
+root@XXXXXXXXX:php artisan migrate:reset
 ```
 を実行してテーブルを削除して``exit``でコンテナから抜けましょう。
 <br>
