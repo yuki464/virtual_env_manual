@@ -1,22 +1,22 @@
 # 環境構築作業手順書 
-|  使った物 |  バージョンETC  |
+| ソフトウェア |  バージョン  |
 | ---- | --- |
-|  仮想環境  |  DOKCER  |
+| docker | 20.10.7 |
 | php | 7.3 |
-|  Webサーバー |  Apache  |
+|  Apache | 2.4.41  |
 | Laravel | 6.0|
 
 ### 下記にて仮想環境手順説明  
 **マックOSにてDocker、php 等の環境は既にインストール済みとして説明します。何卒ご理解ください。**
 ## 目次
-1. [Laravelアプリの雛形を作成](#section1)
-1. [laradockをクローンする](#section2)
-1. [プロジェクト別でDockerマシンを区別するための準備をする](#section3)
-1. [laradockでbuildなどDockerのコマンドで操作する](#section4)
-1. [Apacheの設定ファイルを編集しlaravelのWELLCOME画面を表示させる](#section5)
-1. [DBの設定を編集しユーザー登録などをできるようにする](#section6)
-1. [参考サイト](#section7)
-1. [所感](#section8)
+1. [Dockerで動かすためのLaravelプロジェクトをインストール](#section1)
+1. [Dockerを使用してLaravelの環境構築をするにあたって便利な laradock をクローンする。](#section2)
+1. [プロジェクトごとにdockerマシンを区別して使うための準備をしていきます。](#section3)
+1. [laradockにあるもので必要なものだけをbuildしましょう](#section4)
+1. [Apacheの設定ファイルを編集しlaravelのWELCOME画面を表示させる](#section5)
+1. [DBの設定をしよう](#section6)
+1. [所感](#section7)
+1. [参考サイト](#section8)
 <a id="section1"></a>
 
 ##  1. Dockerで動かすためのLaravelプロジェクトをインストール 　
@@ -33,7 +33,7 @@
 
  <a id="section2"></a>
 
-### 2. Dockerを使用してLaravelの環境構築をするにあたって便利な laradock を使用します。
+### 2. Dockerを使用してLaravelの環境構築をするにあたって便利な laradock をクローンする。
 *laladockとはlaravelアプリをDockerで動かす際に必要なファイルやイメージが用意されたファイルのことを指す。*
 * まずは 
 ``` shell
@@ -159,10 +159,10 @@ $ docker-compose ps
 上記コマンドで変更されているかチェックする癖をつけましょう。
 
 ではここで一度[http://localhost](http://localhost)を確認しましょう。
-どうでしょうか、みんなが大好きなlaravelのWELLCOMEは表示されましたか。
+どうでしょうか、みんなが大好きなlaravelのWELCOMEは表示されましたか。
 *答えはノーですよね。*
 <a id="section5"></a>
-### 5. WELLCOME画面を表示させるためにApacheの設定ファイルを編集していきましょう！
+### 5. Apacheの設定ファイルを編集しlaravelのWELCOME画面を表示させる
 対象ファイルは、``laradock/apache2/sites/default.apache.conf`` です。
 その後
 ``` shell
@@ -286,16 +286,8 @@ $ docker-compose exec workspace php artisan migrate
 を実行してください。
 その後ログインなどDBに接続できれば成功です！
 <a id="section7"></a>
-
-## 7. 参考サイト
-* [マークダウン記法のqiit](https://qiita.com/shizuma/items/8616bbe3ebe8ab0b6ca1)  コレを見ればなんとなくマークダウン記法が描ける様になります！
-* [マークダウン記法ページ内リンク](https://shinshin86.hateblo.jp/entry/2020/04/08/224318)
-* [dockerのコンテナとは](https://tech-lab.sios.jp/archives/18811)  コンテナと言われ簡単に説明がしたかったのでこちらのサイトを参考にしました。
-
-<a id="section8"></a>
-
-## 8. 所感
-* 書簡として私の場合本来Vagrantでやる部分を記憶に新しいDockerでやらせていただいたので、とても難しいや分からない！ということでは無かったです。
+## 7. 所感
+* 所感として私の場合本来Vagrantでやる部分を記憶に新しいDockerでやらせていただいたので、とても難しいや分からない！ということでは無かったです。
 * 基本的にカリキュラムも丁寧なため、しっかり文字を読み自分なりに落とし込めさえすれば、大幅に道が逸れるということはなかったです。
 何よりメンターさんがいたことと、勢いに任せた部分があったので。
 * **ここから大事なことを書きます！**
@@ -309,3 +301,8 @@ $ docker-compose exec workspace php artisan migrate
 調べてもなんとなくしか分からなかったですが、
 ``docker-compose down``はupで作成したコンテナ・ネットワーク・ボリューム・イメージを削除する。とあるので一度downで削除し、再構築をすることで、全てがリセットされ最新の変更に変わるため、治ったのではないかと思いました。
 [docker-compose downの参考サイト](https://qiita.com/yusuke_mrmt/items/e05d7914065824384a6b)
+<a id="section8"></a>
+## ８. 参考サイト
+* [マークダウン記法のqiit](https://qiita.com/shizuma/items/8616bbe3ebe8ab0b6ca1)  コレを見ればなんとなくマークダウン記法が描ける様になります！
+* [マークダウン記法ページ内リンク](https://shinshin86.hateblo.jp/entry/2020/04/08/224318)
+* [dockerのコンテナとは](https://tech-lab.sios.jp/archives/18811)  コンテナと言われ簡単に説明がしたかったのでこちらのサイトを参考にしました。
